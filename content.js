@@ -1,464 +1,47 @@
-// Add modern styles
-const style = document.createElement('style');
-style.textContent = `
-    .link-preview {
-        position: fixed;
-        z-index: 999999;
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 16px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08),
-                    0 2px 8px rgba(0, 0, 0, 0.04),
-                    0 0 1px rgba(0, 0, 0, 0.12);
-        padding: 20px;
-        max-width: 400px;
-        min-width: 320px;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        border: 1px solid rgba(0, 0, 0, 0.05);
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        backdrop-filter: blur(10px);
-        transform-origin: top center;
-    }
-
-    .link-preview:hover {
-        transform: translateY(-2px) scale(1.01);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12),
-                    0 4px 12px rgba(0, 0, 0, 0.06);
-    }
-
-    .preview-loading {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100px;
-    }
-
-    .loading-pulse {
-        width: 8px;
-        height: 8px;
-        background: #6366f1;
-        border-radius: 50%;
-        animation: pulse 1.2s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-        0% { transform: scale(0.95); opacity: 0.5; }
-        50% { transform: scale(1.05); opacity: 0.8; }
-        100% { transform: scale(0.95); opacity: 0.5; }
-    }
-
-    .preview-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 16px;
-    }
-
-    .preview-site-info {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .preview-favicon {
-        width: 24px;
-        height: 24px;
-        border-radius: 8px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-    }
-
-    .preview-domain {
-        font-size: 14px;
-        color: #6b7280;
-        font-weight: 500;
-    }
-
-    .preview-body {
-        margin: 16px 0;
-    }
-
-    .preview-title {
-        font-size: 17px;
-        font-weight: 600;
-        color: #6b7280 !important;
-        margin: 0 0 10px 0;
-        line-height: 1.4;
-        letter-spacing: -0.01em;
-    }
-
-    .preview-description {
-        font-size: 14px;
-        color: #4b5563;
-        line-height: 1.6;
-        margin: 0;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    .preview-security-badge {
-        position: absolute;
-        top: -10px;
-        right: -10px;
-        padding: 8px;
-        border-radius: 50%;
-        background: white;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        font-size: 16px;
-        transition: all 0.2s ease;
-        z-index: 1000000;
-    }
-
-    .preview-security-badge:hover {
-        transform: scale(1.1) rotate(5deg);
-    }
-
-    .preview-security-badge.safe {
-        background: #10b981;
-        color: white;
-    }
-
-    .preview-security-badge.warning {
-        background: #f59e0b;
-        color: white;
-    }
-
-    .preview-security-badge.danger {
-        background: #ef4444;
-        color: white;
-    }
-
-    .security-warnings {
-        margin: 16px 0;
-        padding: 14px;
-        background: #fffbeb;
-        border-radius: 12px;
-        border: 1px solid #fcd34d;
-    }
-
-    .security-warning {
-        color: #92400e;
-        font-size: 13px;
-        margin: 6px 0;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-weight: 500;
-    }
-
-    .security-safe {
-        margin: 16px 0;
-        padding: 14px;
-        background: #ecfdf5;
-        border-radius: 12px;
-        border: 1px solid #6ee7b7;
-        color: #065f46;
-        font-size: 13px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-weight: 500;
-    }
-
-    /* Dark mode */
-    @media (prefers-color-scheme: dark) {
-        .link-preview {
-            background: rgba(17, 24, 39, 0.95);
-            border-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .preview-title {
-            color: #f3f4f6;
-        }
-
-        .preview-description {
-            color: #9ca3af;
-        }
-
-        .preview-domain {
-            color: #d1d5db;
-        }
-
-        .loading-pulse {
-            background: #818cf8;
-        }
-
-        .security-warnings {
-            background: rgba(245, 158, 11, 0.1);
-            border-color: rgba(245, 158, 11, 0.2);
-        }
-
-        .security-warning {
-            color: #fcd34d;
-        }
-
-        .security-safe {
-            background: rgba(16, 185, 129, 0.1);
-            border-color: rgba(16, 185, 129, 0.2);
-            color: #34d399;
-        }
-
-        .preview-security-badge {
-            background: #1f2937;
-        }
-    }
-
-    /* Animations */
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .link-preview {
-        animation: slideIn 0.2s ease-out;
-    }
-
-    /* Glass effect for modern browsers */
-    @supports (backdrop-filter: blur(10px)) {
-        .link-preview {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(10px);
-        }
-
-        @media (prefers-color-scheme: dark) {
-            .link-preview {
-                background: rgba(17, 24, 39, 0.85);
-            }
-        }
-    }
-
-    .preview-iframe {
-        width: 100%; /* Full width */
-        height: 150px; /* Adjust height as needed */
-        border: none; /* Remove default border */
-        border-radius: 8px; /* Match with other elements */
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06); /* Add shadow for consistency */
-        overflow: hidden; /* Hide overflow */
-        background: #fff; /* Background color */
-        // transform: scale(0.8); /* Zoom out to 80% */
-        // transform-origin: top left; /* Set origin for scaling */
-    }
-`;
-
-document.head.appendChild(style);
-
-// Create preview element with modern design
+// Create preview element with better styling
 const previewDiv = document.createElement('div');
 previewDiv.className = 'link-preview';
 previewDiv.innerHTML = `
     <div class="preview-loading">
         <div class="loading-pulse"></div>
+        <span>Loading...</span>
     </div>
     <div class="preview-content" style="display: none;">
         <div class="preview-security-badge"></div>
         <div class="preview-header">
-            <div class="preview-site-info">
-                <img class="preview-favicon" src="" alt="">
-                <div class="preview-domain"></div>
-            </div>
-            <div class="preview-security-status"></div>
+            <img class="preview-favicon" src="" alt="">
+            <div class="preview-title"></div>
         </div>
-        <div class="preview-web-view">
-            <iframe src="" class="preview-iframe"></iframe>
-        </div>
-        <div class="preview-body">
-            <h3 class="preview-title"></h3>
-            <p class="preview-description"></p>
-        </div>
+        <div class="preview-description"></div>
         <div class="preview-security-info"></div>
+        <div class="preview-meta">
+            <span class="preview-url"></span>
+            <span class="preview-security-status"></span>
+        </div>
     </div>
 `;
+document.body.appendChild(previewDiv);
 
-// Initialize variables
+// Track hover state
 let currentLink = null;
 let previewTimeout = null;
-const previewCache = new Map();
+let previewCache = new Map(); // Cache for faster loading
 
-// Event listeners for all clickable elements
-document.addEventListener('mouseover', handleMouseOver);
-document.addEventListener('mouseout', handleMouseOut);
-
-// Handle mouse over event
-function handleMouseOver(event) {
-    const target = event.target;
-    const link = target.closest('a[href], button[href], [data-href], [href], li a[href], span a[href]');
-
-    if (!link) return;
-
-    const url = link.href || link.getAttribute('data-href');
-    if (!url) return;
-
-    // Clear any existing timeouts
-    if (previewTimeout) {
-        clearTimeout(previewTimeout);
-    }
-
-    // Show preview with small delay for better UX
-    previewTimeout = setTimeout(() => {
-        showPreview(link, url);
-    }, 100);
-}
-
-// Handle mouse out event with event parameter
-function handleMouseOut(event) {
-    const target = event.target;
-    const link = target.closest('a') || target.closest('button[href]') || target.closest('[data-href]');
-    
-    if (!link) return;
-
-    if (previewTimeout) {
-        clearTimeout(previewTimeout);
-    }
-
-    // Use event for mouse position check
-    setTimeout(() => {
-        if (!isMouseOverPreview(event)) {
-            hidePreview();
-        }
-    }, 100);
-}
-
-// Check if mouse is over preview
-function isMouseOverPreview(mouseEvent) {
-    const preview = document.querySelector('.link-preview');
-    if (!preview) return false;
-
-    const rect = preview.getBoundingClientRect();
-    
-    // Get mouse coordinates from event or global tracking
-    const mouseX = mouseEvent?.clientX ?? window.mouseX ?? 0;
-    const mouseY = mouseEvent?.clientY ?? window.mouseY ?? 0;
-
-    // Check if mouse is within preview bounds
-    return (
-        mouseX >= rect.left &&
-        mouseX <= rect.right &&
-        mouseY >= rect.top &&
-        mouseY <= rect.bottom
-    );
-}
-
-// Global mouse position tracking
-window.mouseX = 0;
-window.mouseY = 0;
-
-document.addEventListener('mousemove', (event) => {
-    window.mouseX = event.clientX;
-    window.mouseY = event.clientY;
-});
-
-// Show preview with better positioning
-function showPreview(link, url) {
-    currentLink = link;
-    
-    // Get link position
-    const rect = link.getBoundingClientRect();
-    const scrollX = window.scrollX;
-    const scrollY = window.scrollY;
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    // Calculate best position
-    let left = rect.left + scrollX;
-    let top = rect.bottom + scrollY + 10; // Add some spacing
-
-    // Check if preview would go off-screen
-    const previewWidth = 400; // Max width of preview
-    const previewHeight = 200; // Approximate height
-
-    // Adjust horizontal position
-    if (left + previewWidth > viewportWidth - 20) {
-        left = viewportWidth - previewWidth - 20;
-    }
-    if (left < 20) {
-        left = 20;
-    }
-
-    // Adjust vertical position
-    if (top + previewHeight > viewportHeight + scrollY - 20) {
-        top = rect.top + scrollY - previewHeight - 10;
-    }
-
-    // Update preview position
-    previewDiv.style.left = `${left}px`;
-    previewDiv.style.top = `${top}px`;
-    
-    // Show preview
-    previewDiv.style.display = 'block';
-    requestAnimationFrame(() => {
-        previewDiv.style.opacity = '1';
-        previewDiv.style.transform = 'translateY(0)';
-    });
-
-    // Update content
-    updatePreviewContent({
-        title: link.textContent || url,
-        description: link.getAttribute('title') || `Preview for ${url}`,
-        favicon: `https://www.google.com/s2/favicons?domain=${new URL(url).hostname}&sz=128`,
-        url: new URL(url).hostname
-    });
-
-    // Check security
-    checkLinkSecurity(url).then(updateSecurityInfo);
-}
-
-// Hide preview with animation
-function hidePreview() {
-    previewDiv.style.opacity = '0';
-    previewDiv.style.transform = 'translateY(5px)';
-    
-    setTimeout(() => {
-        previewDiv.style.display = 'none';
-        currentLink = null;
-    }, 200);
-}
-
-// Add hover effect to preview
-previewDiv.addEventListener('mouseover', (event) => {
-    if (previewTimeout) {
-        clearTimeout(previewTimeout);
-    }
-});
-
-previewDiv.addEventListener('mouseout', (event) => {
-    const relatedTarget = event.relatedTarget;
-    if (!relatedTarget || !previewDiv.contains(relatedTarget)) {
-        hidePreview();
-    }
-});
-
-// Update preview content
-function updatePreviewContent(data) {
-    const content = previewDiv.querySelector('.preview-content');
-    content.style.display = 'block';
-    previewDiv.querySelector('.preview-loading').style.display = 'none';
-
-    content.querySelector('.preview-title').textContent = data.title || 'No title';
-    content.querySelector('.preview-description').textContent = data.description || '';
-    content.querySelector('.preview-favicon').src = data.favicon || '';
-    content.querySelector('.preview-domain').textContent = data.url || '';
-    content.querySelector('.preview-iframe').src = data.url || '';
-}
-
-// Check link security
+// Security check function
 async function checkLinkSecurity(url) {
     try {
         const urlObj = new URL(url);
         const securityInfo = {
             isSecure: urlObj.protocol === 'https:',
-            safetyStatus: urlObj.protocol === 'https:' ? 'safe' : 'warning',
-            warnings: []
+            domain: urlObj.hostname,
+            warnings: [],
+            safetyStatus: 'unknown'
         };
 
+        // Check for common security issues
         if (!securityInfo.isSecure) {
-            securityInfo.warnings.push('Connection is not secure (HTTP)');
-            showToast('Warning: This link is not secure.');
+            securityInfo.warnings.push('Unsecure connection (HTTP)');
+            securityInfo.safetyStatus = 'warning';
         }
 
         // Check for suspicious TLDs
@@ -466,34 +49,98 @@ async function checkLinkSecurity(url) {
         if (suspiciousTLDs.some(tld => urlObj.hostname.endsWith(tld))) {
             securityInfo.warnings.push('Suspicious domain extension');
             securityInfo.safetyStatus = 'warning';
-            showToast('Warning: Suspicious domain extension.');
+        }
+
+        // Check for deceptive URLs
+        const commonBrands = ['paypal', 'google', 'facebook', 'microsoft', 'apple'];
+        const domainName = urlObj.hostname.toLowerCase();
+        if (commonBrands.some(brand => domainName.includes(brand) && !domainName.endsWith(`.${brand}.com`))) {
+            securityInfo.warnings.push('Potentially deceptive URL');
+            securityInfo.safetyStatus = 'danger';
+        }
+
+        // Check for data URLs
+        if (url.startsWith('data:')) {
+            securityInfo.warnings.push('Data URL detected');
+            securityInfo.safetyStatus = 'danger';
+        }
+
+        // Check for IP addresses instead of domain names
+        const ipRegex = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
+        if (ipRegex.test(urlObj.hostname)) {
+            securityInfo.warnings.push('IP address instead of domain name');
+            securityInfo.safetyStatus = 'warning';
         }
 
         return securityInfo;
     } catch (error) {
-        showToast('Error: Invalid URL format or unable to load.');
         return {
             isSecure: false,
-            safetyStatus: 'danger',
-            warnings: ['Invalid URL format']
+            warnings: ['Invalid URL format'],
+            safetyStatus: 'danger'
         };
     }
 }
 
-// Update security information
-function updateSecurityInfo(securityInfo) {
+// Helper function for security badge icons
+function getSecurityBadgeIcon(status) {
+    const icons = {
+        safe: {
+            icon: '🛡️',
+            color: '#10b981'
+        },
+        warning: {
+            icon: '⚠️',
+            color: '#f59e0b'
+        },
+        danger: {
+            icon: '🚫',
+            color: '#ef4444'
+        },
+        unknown: {
+            icon: 'ℹ️',
+            color: '#6b7280'
+        }
+    };
+
+    const statusInfo = icons[status] || icons.unknown;
+    return `<div style="color: ${statusInfo.color}">${statusInfo.icon}</div>`;
+}
+
+// Show preview immediately with loading state
+async function showQuickPreview(link) {
+    const url = new URL(link.href);
+    const securityInfo = await checkLinkSecurity(link.href);
+    
+    const quickPreview = {
+        title: link.textContent || url.hostname,
+        favicon: `https://www.google.com/s2/favicons?domain=${url.hostname}`,
+        url: url.hostname,
+        security: securityInfo
+    };
+
     const content = previewDiv.querySelector('.preview-content');
+    content.querySelector('.preview-favicon').src = quickPreview.favicon;
+    content.querySelector('.preview-title').textContent = quickPreview.title;
+    content.querySelector('.preview-url').textContent = quickPreview.url;
+
+    // Update security badge and info
     const securityBadge = content.querySelector('.preview-security-badge');
     const securityInfoElement = content.querySelector('.preview-security-info');
+    const securityStatus = content.querySelector('.preview-security-status');
 
-    securityBadge.className = `preview-security-badge ${securityInfo.safetyStatus}`;
-    securityBadge.innerHTML = getSecurityBadgeIcon(securityInfo.safetyStatus);
+    // Set security badge class and icon
+    securityBadge.className = `preview-security-badge ${quickPreview.security.safetyStatus}`;
+    securityBadge.innerHTML = getSecurityBadgeIcon(quickPreview.security.safetyStatus);
 
-    if (securityInfo.warnings.length > 0) {
+    // Update security info
+    if (quickPreview.security.warnings.length > 0) {
         securityInfoElement.innerHTML = `
             <div class="security-warnings">
-                ${securityInfo.warnings.map(warning => `
-                    <div class="security-warning">⚠️ ${warning}</div>
+                ${quickPreview.security.warnings.map(warning => `
+                    <div class="security-warning">
+                        ⚠️ ${warning}
+                    </div>
                 `).join('')}
             </div>
         `;
@@ -504,79 +151,316 @@ function updateSecurityInfo(securityInfo) {
             </div>
         `;
     }
+
+    // Update security status
+    securityStatus.textContent = quickPreview.security.isSecure ? '🔒 Secure' : '⚠️ Not Secure';
+    
+    // Show preview
+    previewDiv.querySelector('.preview-loading').style.display = 'none';
+    content.style.display = 'block';
+    
+    positionPreview(link);
+    showPreview(link);
 }
 
-// Get security badge icon
-function getSecurityBadgeIcon(status) {
-    const icons = {
-        safe: '🔒',
-        warning: '⚠️',
-        danger: '🚫'
-    };
-    return icons[status] || '❓';
-}
+// Position preview
+function positionPreview(link) {
+    const rect = link.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    let left = rect.left + window.scrollX;
+    let top = rect.bottom + window.scrollY + 5;
 
-// Initialize preview div
-document.body.appendChild(previewDiv);
-
-// Update mouse position tracking
-let mouseX = 0;
-let mouseY = 0;
-
-document.addEventListener('mousemove', (event) => {
-    mouseX = event.clientX;
-    mouseY = event.clientY;
-});
-  
-
-// -----------------------------------------------------------------------------------------------
-async function fetchLinkDetails(url) {
-    try {
-        const response = await fetch(url, { method: 'GET', mode: 'cors' });
-        const text = await response.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(text, 'text/html');
-
-        const title = doc.querySelector('title') ? doc.querySelector('title').innerText : 'No title';
-        const description = doc.querySelector('meta[name="description"]') ? doc.querySelector('meta[name="description"]').content : 'No description';
-        const favicon = doc.querySelector('link[rel="icon"]') ? doc.querySelector('link[rel="icon"]').href : '';
-        const domain = new URL(url).hostname; // Extract domain from URL
-
-        return { title, description, favicon, domain };
-    } catch (error) {
-        console.error('Error fetching link details:', error);
-        return { title: 'Error', description: 'Could not fetch details', favicon: '', domain: '' };
+    if (left + previewDiv.offsetWidth > viewportWidth) {
+        left = viewportWidth - previewDiv.offsetWidth - 10;
     }
+    if (top + previewDiv.offsetHeight > viewportHeight + window.scrollY) {
+        top = rect.top + window.scrollY - previewDiv.offsetHeight - 5;
+    }
+
+    previewDiv.style.left = `${left}px`;
+    previewDiv.style.top = `${top}px`;
 }
 
-// Function to show toast message
-function showToast(message) {
-    const toast = document.createElement('div');
-    toast.className = 'toast-message';
-    toast.textContent = message;
-    document.body.appendChild(toast);
+// Show/hide preview with animation
+function showPreview(link) {
+    previewDiv.style.display = 'block';
+    previewDiv.style.opacity = '0';
+    previewDiv.style.transform = 'translateY(5px)';
+    
+    requestAnimationFrame(() => {
+        previewDiv.style.opacity = '1';
+        previewDiv.style.transform = 'translateY(0)';
+    });
+}
 
-    // Remove toast after 3 seconds
+function hidePreview() {
+    previewDiv.style.opacity = '0';
+    previewDiv.style.transform = 'translateY(5px)';
+    
     setTimeout(() => {
-        toast.remove();
-    }, 3000);
+        previewDiv.style.display = 'none';
+    }, 150);
 }
 
-// CSS for toast message
-const styleToast = document.createElement('style');
-styleToast.textContent = `
-    .toast-message {
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #333;
-        color: #fff;
-        padding: 10px 20px;
-        border-radius: 5px;
-        z-index: 9999;
-        opacity: 0.9;
-        transition: opacity 0.5s;
+// Mouse over handler with instant preview
+document.addEventListener('mouseover', (event) => {
+    const link = event.target.closest('a');
+    if (!link || !link.href) return;
+
+    currentLink = link;
+    
+    if (previewTimeout) {
+        clearTimeout(previewTimeout);
     }
+
+    // Show quick preview immediately
+    showQuickPreview(link);
+
+    // Then load full preview
+    if (previewCache.has(link.href)) {
+        updatePreviewContent(previewCache.get(link.href));
+    } else {
+        chrome.runtime.sendMessage({
+            type: 'fetchPreview',
+            url: link.href
+        }, (response) => {
+            if (response && !response.error) {
+                previewCache.set(link.href, response);
+                if (currentLink === link) {
+                    updatePreviewContent(response);
+                }
+            }
+        });
+    }
+});
+
+// Update preview content
+function updatePreviewContent(data) {
+    const content = previewDiv.querySelector('.preview-content');
+    content.querySelector('.preview-title').textContent = data.title;
+    if (data.description) {
+        content.querySelector('.preview-description').textContent = data.description;
+    }
+}
+
+// Mouse out handler
+document.addEventListener('mouseout', (event) => {
+    const link = event.target.closest('a');
+    if (!link) return;
+
+    if (previewTimeout) {
+        clearTimeout(previewTimeout);
+    }
+
+    hidePreview();
+    currentLink = null;
+});
+
+// Add styles
+const style = document.createElement('style');
+style.textContent = `
+.link-preview {
+    position: absolute;
+    z-index: 10000;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 6px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    padding: 10px 14px;
+    max-width: 300px;
+    min-width: 200px;
+    transition: all 0.15s ease;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.preview-loading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    padding: 6px;
+}
+
+.loading-pulse {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #6366f1;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.95); opacity: 0.4; }
+    50% { transform: scale(1.05); opacity: 0.7; }
+    100% { transform: scale(0.95); opacity: 0.4; }
+}
+
+.preview-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.preview-favicon {
+    width: 14px;
+    height: 14px;
+}
+
+.preview-title {
+    font-weight: 500;
+    font-size: 13px;
+    color: #374151;
+    line-height: 1.4;
+}
+
+.preview-description {
+    font-size: 12px;
+    color: #6b7280;
+    line-height: 1.5;
+    margin: 4px 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.preview-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #9ca3af;
+    margin-top: 4px;
+}
+
+/* Dark mode - lighter version */
+@media (prefers-color-scheme: dark) {
+    .link-preview {
+        background: rgba(30, 41, 59, 0.95);
+        border-color: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .preview-title {
+        color: #e5e7eb;
+    }
+
+    .preview-description {
+        color: #cbd5e1;
+    }
+
+    .preview-meta {
+        color: #94a3b8;
+    }
+
+    .loading-pulse {
+        background: #818cf8;
+    }
+}
+
+/* Hover effect */
+.link-preview:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+/* Loading text */
+.preview-loading span {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* Error state */
+.preview-error {
+    padding: 8px;
+    text-align: center;
+    color: #ef4444;
+    font-size: 12px;
+}
+
+.preview-security-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    padding: 4px;
+    border-radius: 50%;
+    font-size: 16px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.preview-security-badge.safe {
+    background: #10b981;
+    color: white;
+}
+
+.preview-security-badge.warning {
+    background: #f59e0b;
+    color: white;
+}
+
+.preview-security-badge.danger {
+    background: #ef4444;
+    color: white;
+}
+
+.security-warnings {
+    margin: 8px 0;
+    padding: 8px;
+    background: #fff3cd;
+    border-radius: 4px;
+    border: 1px solid #ffeeba;
+}
+
+.security-warning {
+    color: #856404;
+    font-size: 11px;
+    margin: 2px 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.security-safe {
+    margin: 8px 0;
+    padding: 8px;
+    background: #d4edda;
+    border-radius: 4px;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.preview-security-status {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+    .security-warnings {
+        background: rgba(245, 158, 11, 0.1);
+        border-color: rgba(245, 158, 11, 0.2);
+    }
+
+    .security-warning {
+        color: #fcd34d;
+    }
+
+    .security-safe {
+        background: rgba(16, 185, 129, 0.1);
+        border-color: rgba(16, 185, 129, 0.2);
+        color: #34d399;
+    }
+}
 `;
-document.head.appendChild(styleToast);
+
+document.head.appendChild(style);
+  

@@ -12,60 +12,36 @@ self.DOMParser = class {
 // Handle messages from content script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.type === 'fetchPreview') {
-        fetchPreviewData(request.url)
-            .then(data => sendResponse(data))
-            .catch(error => sendResponse({ error: error.message }));
+        fetch(request.url)
+            .then(response => response.text())
+            .then(html => {
+                // Extract data without DOMParser
+                const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+                const descriptionMatch = html.match(/<meta[^>]*name="description"[^>]*content="([^"]+)"[^>]*>/i) ||
+                                       html.match(/<meta[^>]*property="og:description"[^>]*content="([^"]+)"[^>]*>/i);
+                const faviconMatch = html.match(/<link[^>]*rel="icon"[^>]*href="([^"]+)"[^>]*>/i) ||
+                                   html.match(/<link[^>]*rel="shortcut icon"[^>]*href="([^"]+)"[^>]*>/i);
+
+                const previewData = {
+                    title: titleMatch ? titleMatch[1].trim() : 'No title available',
+                    description: descriptionMatch ? descriptionMatch[1].trim() : 'No description available',
+                    favicon: faviconMatch ? new URL(faviconMatch[1], request.url).href : 
+                            new URL('/favicon.ico', request.url).href
+                };
+
+                const imageMatch = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"[^>]*>/i);
+                previewData.image = imageMatch ? new URL(imageMatch[1], request.url).href : null;
+
+                sendResponse(previewData);
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                sendResponse({ error: 'Failed to fetch page content' });
+            });
+
         return true; // Will respond asynchronously
     }
 });
-
-// Function to fetch preview data
-async function fetchPreviewData(url) {
-    try {
-        const response = await fetch(url);
-        const html = await response.text();
-        
-        // Extract metadata
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        
-        // Get title
-        const title = doc.querySelector('title')?.textContent ||
-                     doc.querySelector('meta[property="og:title"]')?.content ||
-                     url;
-
-        // Get description
-        const description = doc.querySelector('meta[name="description"]')?.content ||
-                          doc.querySelector('meta[property="og:description"]')?.content ||
-                          '';
-
-        // Get favicon
-        const favicon = doc.querySelector('link[rel="icon"]')?.href ||
-                       doc.querySelector('link[rel="shortcut icon"]')?.href ||
-                       `https://www.google.com/s2/favicons?domain=${new URL(url).hostname}&sz=128`;
-
-        // Get image
-        const image = doc.querySelector('meta[property="og:image"]')?.content ||
-                     doc.querySelector('meta[name="twitter:image"]')?.content ||
-                     '';
-
-        return {
-            title,
-            description,
-            favicon,
-            image,
-            url: new URL(url).hostname
-        };
-    } catch (error) {
-        console.error('Error fetching preview:', error);
-        return {
-            title: url,
-            description: '',
-            favicon: `https://www.google.com/s2/favicons?domain=${new URL(url).hostname}&sz=128`,
-            url: new URL(url).hostname
-        };
-    }
-}
 
 // Handle installation
 chrome.runtime.onInstalled.addListener(() => {
