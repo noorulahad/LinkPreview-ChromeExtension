@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Preview Settings</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-section">
+                <img src="../icons/icon48.png" alt="Logo" class="logo">
+                <h1>Link Preview</h1>
+            </div>
+            <p class="version">v1.0.0</p>
+        </header>
+
+        <main>
+            <section class="settings-group">
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Enable Previews</h3>
+                        <p>Show preview cards when hovering over links</p>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="enablePreview" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Dark Mode</h3>
+                        <p>Use dark theme for preview cards</p>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" id="darkMode">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <h3>Preview Delay</h3>
+                        <p>Time before preview appears (ms)</p>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" id="previewDelay" min="0" max="1000" step="100" value="500">
+                        <span id="delayValue">500ms</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="settings-group">
+                <h3>Preview Style</h3>
+                <div class="style-buttons">
+                    <button class="style-btn active" data-style="modern">
+                        <span class="style-icon">🎨</span>
+                        Modern
+                    </button>
+                    <button class="style-btn" data-style="minimal">
+                        <span class="style-icon">⚡</span>
+                        Minimal
+                    </button>
+                    <button class="style-btn" data-style="classic">
+                        <span class="style-icon">📝</span>
+                        Classic
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <button id="saveSettings" class="save-button">Save Settings</button>
+            <div class="footer-links">
+                <a href="#" id="helpBtn">Help</a>
+                <span class="separator">•</span>
+                <a href="#" id="reportIssue">Report Issue</a>
+            </div>
+        </footer>
+    </div>
+
+    <div id="saveToast" class="toast">Settings saved successfully!</div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>

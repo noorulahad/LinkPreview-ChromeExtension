@@ -1,0 +1,242 @@
+:root {
+    --primary-color: #4f46e5;
+    --primary-hover: #4338ca;
+    --bg-color: #ffffff;
+    --text-color: #1f2937;
+    --text-secondary: #6b7280;
+    --border-color: #e5e7eb;
+    --success-color: #10b981;
+}
+
+body {
+    width: 360px;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+}
+
+.container {
+    padding: 20px;
+}
+
+/* Header Styles */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo {
+    width: 32px;
+    height: 32px;
+}
+
+h1 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.version {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* Settings Group */
+.settings-group {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+}
+
+.setting-info h3 {
+    font-size: 14px;
+    margin: 0 0 4px 0;
+}
+
+.setting-info p {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* Toggle Switch */
+.toggle {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #e5e7eb;
+    transition: .3s;
+    border-radius: 34px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: var(--primary-color);
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(20px);
+}
+
+/* Slider */
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+input[type="range"] {
+    width: 150px;
+}
+
+/* Style Buttons */
+.style-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.style-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.style-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.style-icon {
+    font-size: 20px;
+}
+
+/* Footer */
+footer {
+    margin-top: 24px;
+    text-align: center;
+}
+
+.save-button {
+    width: 100%;
+    padding: 12px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.save-button:hover {
+    background: var(--primary-hover);
+}
+
+.footer-links {
+    margin-top: 16px;
+    font-size: 12px;
+}
+
+.footer-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+}
+
+.separator {
+    margin: 0 8px;
+    color: var(--text-secondary);
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--success-color);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 1000;
+}
+
+.toast.show {
+    opacity: 1;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: #1f2937;
+        --text-color: #f9fafb;
+        --text-secondary: #9ca3af;
+        --border-color: #374151;
+    }
+
+    .settings-group {
+        background: #374151;
+    }
+
+    .style-btn {
+        background: #374151;
+    }
+}

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Link Preview Example</title>
+  <style>
+    .preview-window {
+      position: absolute;
+      width: 300px;
+      height: 200px;
+      border: 1px solid #ccc;
+      background-color: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      display: none;
+      z-index: 999;
+    }
+    .preview-window iframe {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <h1>Hover over the link to preview it</h1>
+  <a href="http://wixerp.com/about" class="preview-link">Visit Example</a>
+  <div class="preview-window" id="previewWindow">
+    <iframe id="previewIframe"></iframe>
+  </div>
+
+  <script>
+    const previewLink = document.querySelector('.preview-link');
+    const previewWindow = document.getElementById('previewWindow');
+    const previewIframe = document.getElementById('previewIframe');
+
+    previewLink.addEventListener('mouseover', function(event) {
+      // Show the preview window when hovering over the link
+      previewWindow.style.display = 'block';
+      
+      // Position the preview window near the link
+      const rect = previewLink.getBoundingClientRect();
+      previewWindow.style.top = rect.top + window.scrollY + rect.height + 'px';
+      previewWindow.style.left = rect.left + window.scrollX + 'px';
+      
+      // Set the iframe source to the link's URL
+      previewIframe.src = previewLink.href;
+    });
+
+    previewLink.addEventListener('mouseout', function() {
+      // Hide the preview window when mouse leaves the link
+      previewWindow.style.display = 'none';
+    });
+  </script>
+</body>
+</html>
